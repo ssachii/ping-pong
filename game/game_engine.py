@@ -51,6 +51,28 @@ class GameEngine:
         # AI movement
         self.ai.auto_track(self.ball, self.height)
 
+    def check_game_over(self, screen):
+        if self.player_score == 5 or self.ai_score == 5:
+            winner_text = "Player Wins!" if self.player_score == 5 else "AI Wins!"
+    
+            # Fill screen and display winner
+            screen.fill((0, 0, 0))
+            text = self.font.render(winner_text, True, WHITE)
+            screen.blit(
+                text,
+                (
+                    self.width // 2 - text.get_width() // 2,
+                    self.height // 2 - text.get_height() // 2
+                )
+            )
+            pygame.display.flip()
+    
+            # Pause for 2 seconds so players can see the message
+            pygame.time.delay(2000)
+    
+            # Quit the game gracefully
+            pygame.quit()
+            quit()
 
     def render(self, screen):
         # Draw paddles and ball
@@ -58,9 +80,14 @@ class GameEngine:
         pygame.draw.rect(screen, WHITE, self.ai.rect())
         pygame.draw.ellipse(screen, WHITE, self.ball.rect())
         pygame.draw.aaline(screen, WHITE, (self.width//2, 0), (self.width//2, self.height))
-
+    
         # Draw score
         player_text = self.font.render(str(self.player_score), True, WHITE)
         ai_text = self.font.render(str(self.ai_score), True, WHITE)
         screen.blit(player_text, (self.width//4, 20))
         screen.blit(ai_text, (self.width * 3//4, 20))
+    
+        # --- Check for game over condition ---
+        self.check_game_over(screen)
+
+
