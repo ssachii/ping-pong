@@ -1,4 +1,10 @@
 import pygame
+import pygame
+from .paddle import Paddle
+from .ball import Ball
+
+pygame.mixer.init()  # ✅ Initialize the sound mixer
+
 from .paddle import Paddle
 from .ball import Ball
 
@@ -22,6 +28,12 @@ class GameEngine:
         self.winning_score = 5  # default target
         self.font = pygame.font.SysFont("Arial", 30)
 
+        # --- Sound Effects ---
+        self.sound_paddle = pygame.mixer.Sound("assets/sounds/paddle_hit.wav")
+        self.sound_wall = pygame.mixer.Sound("assets/sounds/wall_bounce.wav")
+        self.sound_score = pygame.mixer.Sound("assets/sounds/score.wav")
+
+
     def handle_input(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_w]:
@@ -33,21 +45,24 @@ class GameEngine:
         # Move the ball
         self.ball.move()
     
-        # --- FIX: Add immediate collision check here ---
         ball_rect = self.ball.rect()
         if ball_rect.colliderect(self.player.rect()):
-            self.ball.velocity_x = abs(self.ball.velocity_x)  # bounce to the right
+            self.ball.velocity_x = abs(self.ball.velocity_x)  # bounce right
+            self.sound_paddle.play()
         elif ball_rect.colliderect(self.ai.rect()):
-            self.ball.velocity_x = -abs(self.ball.velocity_x)  # bounce to the left
-        # ------------------------------------------------
-    
+            self.ball.velocity_x = -abs(self.ball.velocity_x)  # bounce left
+            self.sound_paddle.play()
+
         # Scoring logic
         if self.ball.x <= 0:
             self.ai_score += 1
+            self.sound_score.play()  # ✅ Play sound for AI scoring
             self.ball.reset()
         elif self.ball.x >= self.width:
             self.player_score += 1
+            self.sound_score.play()  # ✅ Play sound for player scoring
             self.ball.reset()
+
     
         # AI movement
         self.ai.auto_track(self.ball, self.height)
